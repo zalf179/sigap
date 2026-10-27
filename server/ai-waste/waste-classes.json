@@ -1,0 +1,152 @@
+{
+  "aerosol_cans": {
+    "label_display": "Kaleng aerosol bertekanan",
+    "category": "B3",
+    "handling_instruction": "Jangan dilubangi, dibakar, atau diletakkan dekat api dan panas. Simpan tegak di tempat sejuk, lalu serahkan ke pengumpulan B3; jangan dipadatkan."
+  },
+  "aluminum_food_cans": {
+    "label_display": "Kaleng makanan aluminium",
+    "category": "Anorganik",
+    "handling_instruction": "Keluarkan sisa makanan dan bilas kaleng. Tekan perlahan agar ringkas tanpa membuat tepi tajam terbuka, lalu kumpulkan bersama aluminium."
+  },
+  "aluminum_soda_cans": {
+    "label_display": "Kaleng minuman aluminium",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan dan bilas kaleng minuman. Pipihkan bila aman, kemudian setorkan terpisah sebagai aluminium agar mudah didaur ulang."
+  },
+  "cardboard_boxes": {
+    "label_display": "Kardus",
+    "category": "Anorganik",
+    "handling_instruction": "Pastikan kardus kering, lepaskan plastik atau perekat besar, lalu lipat rata sebelum dikumpulkan bersama kertas dan kardus."
+  },
+  "cardboard_packaging": {
+    "label_display": "Kemasan kardus",
+    "category": "Anorganik",
+    "handling_instruction": "Pisahkan lapisan plastik atau busa dari kemasan, jaga bagian kardus tetap kering, dan ratakan sebelum disetor."
+  },
+  "clothing": {
+    "label_display": "Pakaian atau kain",
+    "category": "Residu",
+    "handling_instruction": "Jika masih layak, cuci dan salurkan untuk guna ulang. Kain yang rusak berat pisahkan sebagai residu tekstil; jangan masukkan ke daur ulang kertas atau plastik."
+  },
+  "coffee_grounds": {
+    "label_display": "Ampas kopi",
+    "category": "Organik",
+    "handling_instruction": "Tiriskan ampas kopi dan campurkan ke kompos bersama bahan kering seperti daun. Jangan membuang gumpalan ampas ke saluran air."
+  },
+  "disposable_plastic_cutlery": {
+    "label_display": "Alat makan plastik sekali pakai",
+    "category": "Residu",
+    "handling_instruction": "Bersihkan sisa makanan, lalu buang sebagai residu karena alat makan kecil dan kotor sulit dipilah untuk daur ulang."
+  },
+  "eggshells": {
+    "label_display": "Cangkang telur",
+    "category": "Organik",
+    "handling_instruction": "Remukkan cangkang agar cepat terurai dan masukkan ke komposter. Pisahkan dari kemasan telur dan bersihkan sisa cairannya."
+  },
+  "food_waste": {
+    "label_display": "Sisa makanan",
+    "category": "Organik",
+    "handling_instruction": "Tiriskan kuah atau minyak, lalu olah sisa makanan menjadi kompos atau masukkan ke wadah organik tertutup agar tidak mengundang hama."
+  },
+  "glass_beverage_bottles": {
+    "label_display": "Botol kaca minuman",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan botol dan pisahkan dari bahan lain. Jangan pecahkan; bila retak atau pecah, bungkus tebal dan beri tanda agar tidak melukai petugas."
+  },
+  "glass_cosmetic_containers": {
+    "label_display": "Wadah kosmetik kaca",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan wadah kosmetik dan lepas tutupnya. Kumpulkan terpisah; bungkus pecahan kaca dengan bahan tebal dan beri tanda hati-hati."
+  },
+  "glass_food_jars": {
+    "label_display": "Toples kaca makanan",
+    "category": "Anorganik",
+    "handling_instruction": "Bilas toples dan lepaskan tutup logamnya. Jaga tetap utuh saat disetor; pecahan harus dibungkus rapat dan dipisahkan agar tidak melukai."
+  },
+  "magazines": {
+    "label_display": "Majalah",
+    "category": "Anorganik",
+    "handling_instruction": "Lepaskan sampul plastik dan sisihkan halaman yang basah atau berminyak. Tumpuk majalah kering agar dapat dipilah sebagai kertas."
+  },
+  "newspaper": {
+    "label_display": "Koran",
+    "category": "Anorganik",
+    "handling_instruction": "Jaga koran tetap kering dan jauhkan dari sisa makanan. Ikat atau tumpuk rapi sebelum diserahkan ke pengumpulan kertas."
+  },
+  "office_paper": {
+    "label_display": "Kertas kantor",
+    "category": "Anorganik",
+    "handling_instruction": "Pisahkan kertas bersih dari tisu, kertas berlapis, dan bahan basah. Hancurkan dokumen berisi data pribadi sebelum disetor."
+  },
+  "paper_cups": {
+    "label_display": "Gelas kertas",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan dan tiriskan gelas. Periksa lapisan dalamnya; pisahkan tutup plastik, dan jangan campurkan gelas yang masih basah dengan kardus kering."
+  },
+  "plastic_cup_lids": {
+    "label_display": "Tutup gelas plastik",
+    "category": "Anorganik",
+    "handling_instruction": "Bersihkan sisa minuman dan lepaskan sedotan atau segel. Kumpulkan tutup kecil dalam wadah agar tidak tercecer saat pemilahan."
+  },
+  "plastic_detergent_bottles": {
+    "label_display": "Botol deterjen plastik",
+    "category": "Anorganik",
+    "handling_instruction": "Habiskan isinya, bilas botol sampai tidak ada deterjen tersisa, lalu keringkan. Pisahkan tutup dan setorkan sebagai plastik keras."
+  },
+  "plastic_food_containers": {
+    "label_display": "Wadah makanan plastik",
+    "category": "Anorganik",
+    "handling_instruction": "Kerik sisa makanan, bilas wadah, dan keringkan sebelum dipilah. Pisahkan tutupnya supaya setiap bagian mudah dikenali."
+  },
+  "plastic_shopping_bags": {
+    "label_display": "Kantong belanja plastik",
+    "category": "Anorganik",
+    "handling_instruction": "Pastikan kantong kosong dan bersih, keringkan, lalu lipat menjadi satu ikatan. Pisahkan dari plastik keras dan jangan setorkan kantong berminyak."
+  },
+  "plastic_soda_bottles": {
+    "label_display": "Botol minuman soda plastik",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan dan bilas botol soda, lepaskan tutup serta label jika mudah, lalu pipihkan sebelum disetor sebagai plastik daur ulang."
+  },
+  "plastic_straws": {
+    "label_display": "Sedotan plastik",
+    "category": "Residu",
+    "handling_instruction": "Buang sedotan sebagai residu karena ukurannya terlalu kecil untuk banyak proses pemilahan. Jangan membuangnya ke selokan atau toilet."
+  },
+  "plastic_trash_bags": {
+    "label_display": "Kantong sampah plastik",
+    "category": "Residu",
+    "handling_instruction": "Jika kantong telah menampung sampah campuran atau kotor, ikat rapat dan buang sebagai residu. Jangan campurkan kantong tercemar ke plastik bersih."
+  },
+  "plastic_water_bottles": {
+    "label_display": "Botol air plastik",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan sisa air, lepas tutup dan label, pipihkan botol, lalu setor ke bank sampah atau tempat pemilahan."
+  },
+  "shoes": {
+    "label_display": "Sepatu",
+    "category": "Residu",
+    "handling_instruction": "Sepatu yang masih layak dapat disalurkan untuk guna ulang. Sepatu rusak berat pisahkan sebagai residu karena sol dan bahan campurannya sulit didaur ulang."
+  },
+  "steel_food_cans": {
+    "label_display": "Kaleng makanan baja",
+    "category": "Anorganik",
+    "handling_instruction": "Kosongkan dan bilas kaleng baja. Hati-hati pada bibir kaleng yang tajam, lalu kumpulkan bersama logam untuk didaur ulang."
+  },
+  "styrofoam_cups": {
+    "label_display": "Gelas styrofoam",
+    "category": "Residu",
+    "handling_instruction": "Buang sebagai residu setelah sisa minuman dikosongkan. Jangan dibakar atau dihancurkan menjadi butiran yang mudah terbawa angin."
+  },
+  "styrofoam_food_containers": {
+    "label_display": "Wadah makanan styrofoam",
+    "category": "Residu",
+    "handling_instruction": "Kerik sisa makanan dan masukkan wadah ke residu. Jangan membakar styrofoam karena asapnya berbahaya dan serpihannya mudah menyebar."
+  },
+  "tea_bags": {
+    "label_display": "Kantong teh",
+    "category": "Organik",
+    "handling_instruction": "Tiriskan kantong teh dan buang isi serta kantong yang dapat terurai ke kompos. Lepaskan staples, tali, dan label kertas berlapis."
+  }
+}

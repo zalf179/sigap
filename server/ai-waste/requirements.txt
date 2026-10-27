@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-multipart
+keras>=3
+tensorflow
+huggingface_hub
+numpy
+Pillow
