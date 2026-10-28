@@ -136,7 +136,7 @@ export default function PetugasDashboard() {
             <tbody>
               {reports.map((r) => (
                 <tr key={r.id} className={`border-b border-gray-100 hover:bg-gray-50 ${r.status === 'Menunggu' ? 'bg-gray-50/50' : ''}`}>
-                  <td className="px-4 py-2.5 text-gray-900 font-mono text-xs">{r.ticket_number}</td>
+                  <td className="px-4 py-2.5 text-gray-900 text-xs">{r.ticket_number}</td>
                   <td className="px-4 py-2.5 text-gray-900">{r.reporter_name}</td>
                   <td className="px-4 py-2.5 text-gray-700">{r.block_name}</td>
                   <td className="px-4 py-2.5 text-gray-700">{r.category_name}</td>

@@ -9,6 +9,7 @@ export default function BerandaWarga() {
   const [articles, setArticles] = useState([])
   const [schedules, setSchedules] = useState([])
   const [loading, setLoading] = useState(true)
+  const [selectedDay, setSelectedDay] = useState('')
 
   useEffect(() => {
     Promise.all([
@@ -30,12 +31,17 @@ export default function BerandaWarga() {
   }, {})
 
   const order = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']
+  const visibleDays = order.filter((day) => grouped[day])
+  const scheduleDays = selectedDay ? [selectedDay] : visibleDays
 
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Kabar lingkungan Anda</h1>
-        <p className="text-sm text-gray-600 mt-1">Selamat datang{user?.name ? `, ${user.name.split(' ')[0]}` : ''}. Pantau jadwal dan rawat kawasan bersama.</p>
+      <div className="resident-heading">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Kabar lingkungan Anda</h1>
+          <p className="text-sm text-gray-600 mt-1">Selamat datang{user?.name ? `, ${user.name.split(' ')[0]}` : ''}. Pantau jadwal dan rawat kawasan bersama.</p>
+        </div>
+        <span className="resident-heading-mark" aria-hidden="true">SIGAP</span>
       </div>
       <div className="resident-actions" aria-label="Tindakan cepat">
         <Link to="/identifikasi" className="resident-action resident-action-primary"><span className="action-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.2c0 4.7 3.2 8.2 7.5 9.8 4.3-1.6 7.5-5.1 7.5-9.8V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span><strong>Kenali jenis sampah</strong><small>Unggah foto untuk mendapat petunjuk pilah</small></span><span className="action-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></svg></span></Link>
@@ -59,13 +65,17 @@ export default function BerandaWarga() {
             </div>
           </section>
           <section className="border border-gray-200 bg-white home-section">
-            <div className="px-4 py-3 border-b border-gray-200">
+            <div className="home-section-heading">
               <div><h2 className="text-base font-medium text-gray-900">Jadwal angkut blok Anda</h2><p className="section-note">Waktu pengumpulan yang perlu diketahui</p></div>
             </div>
-            <div className="px-4 py-3">
+            <div className="schedule-content">
               {schedules.length === 0 && <div className="text-sm text-gray-600">Belum ada jadwal untuk blok Anda.</div>}
+              {visibleDays.length > 0 && <div className="schedule-day-filter" aria-label="Pilih hari jadwal">
+                <button type="button" className={!selectedDay ? 'is-selected' : ''} aria-pressed={!selectedDay} onClick={() => setSelectedDay('')}>Semua hari</button>
+                {visibleDays.map((day) => <button key={day} type="button" className={selectedDay === day ? 'is-selected' : ''} aria-pressed={selectedDay === day} onClick={() => setSelectedDay(day)}>{day}</button>)}
+              </div>}
               <div className="space-y-4">
-                {order.map((day) => {
+                {scheduleDays.map((day) => {
                   if (!grouped[day]) return null
                   return (
                     <div key={day}>

@@ -1,107 +1,273 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useGSAP } from '@gsap/react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import api from '../api/axios'
+import { useLenisRef } from '../lib/LenisProvider.jsx'
 
-function BrandMark() {
-  return <span className="landing-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21V11"/><path d="M12 14c-4.7 0-7-2.3-7-7 4.7 0 7 2.3 7 7Z"/><path d="M12 11c0-3.8 2-5.8 6-6 0 4-2 6-6 6Z"/><path d="M5 21h14"/></svg></span>
+gsap.registerPlugin(useGSAP, ScrollTrigger)
+
+const categoryGuidance = {
+  organik: {
+    description: 'Sampah mudah terurai seperti sisa makanan, daun, rumput.',
+    handling_instruction: 'Pisahkan ke wadah organik tertutup. Bisa diolah menjadi kompos. Jangan dicampur dengan plastik.',
+  },
+  anorganik: {
+    description: 'Sampah tidak mudah terurai seperti plastik, kertas, kaleng, logam.',
+    handling_instruction: 'Pastikan bahan daur ulang bersih dan kering, pisahkan menurut jenisnya, lalu setorkan ke tempat pemilahan.',
+  },
+  b3: {
+    description: 'Bahan Berbahaya dan Beracun seperti baterai, lampu neon, obat kadaluarsa, kemasan beracun.',
+    handling_instruction: 'Jangan dibuang ke tempat sampah umum. Kumpulkan terpisah dalam wadah kedap, jauhkan dari jangkauan anak, dan serahkan ke petugas sesuai jadwal penyerahan B3.',
+  },
+  residu: {
+    description: 'Sampah yang sulit didaur ulang melalui pemilahan rumah tangga.',
+    handling_instruction: 'Pisahkan dari bahan daur ulang dan buang dalam wadah residu tertutup.',
+  },
 }
 
-function FieldIllustration() {
+function completeCategoryGuidance(categories) {
+  return categories.map((category) => {
+    const fallback = categoryGuidance[category.name?.trim().toLowerCase()]
+    return {
+      ...category,
+      description: category.description?.trim() || fallback?.description || '',
+      handling_instruction: category.handling_instruction?.trim() || fallback?.handling_instruction || '',
+    }
+  })
+}
+
+function WasteGuide() {
+  const [categories, setCategories] = useState([])
+  const [selectedId, setSelectedId] = useState(null)
+  const [status, setStatus] = useState('loading')
+
+  useEffect(() => {
+    let active = true
+    api.get('/categories')
+      .then(({ data }) => {
+        if (!active) return
+        const rows = completeCategoryGuidance(data.categories || [])
+        setCategories(rows)
+        setSelectedId(rows[0]?.id ?? null)
+        setStatus('ready')
+      })
+      .catch(() => { if (active) setStatus('error') })
+    return () => { active = false }
+  }, [])
+
+  const selected = categories.find((category) => category.id === selectedId)
+
   return (
-    <svg className="field-illustration" viewBox="0 0 600 430" role="img" aria-labelledby="field-title field-desc">
-      <title id="field-title">Alur layanan SIGAP</title>
-      <desc id="field-desc">Tiga jalur layanan yang menghubungkan informasi warga, tindak lanjut petugas, dan pengelolaan kawasan.</desc>
-      <rect className="plot-bed plot-bed-wide" x="74" y="82" width="388" height="74" rx="15"/>
-      <rect className="plot-bed plot-bed-small" x="282" y="182" width="238" height="66" rx="15"/>
-      <rect className="plot-bed plot-bed-medium" x="112" y="273" width="356" height="66" rx="15"/>
-      <path className="field-path" d="M190 156v26h211M401 248v25H230"/>
-      <path className="field-path-motion" d="M190 156v26h211M401 248v25H230" pathLength="1" aria-hidden="true"/>
-      <path className="field-path-soft" d="M230 182v-13h-40M401 261h34"/>
-      <circle className="field-node field-node-leaf" cx="190" cy="156" r="9"/>
-      <circle className="field-node field-node-clay" cx="401" cy="248" r="9"/>
-      <circle className="field-node field-node-gold" cx="230" cy="273" r="9"/>
-      <rect className="field-band field-band-leaf" x="98" y="105" width="10" height="28" rx="5"/>
-      <rect className="field-band field-band-clay" x="307" y="201" width="10" height="28" rx="5"/>
-      <rect className="field-band field-band-gold" x="137" y="292" width="10" height="28" rx="5"/>
-      <circle className="field-node field-node-sage" cx="422" cy="119" r="16"/>
-      <circle className="field-node field-node-sage" cx="481" cy="215" r="11"/>
-      <circle className="field-node field-node-sage" cx="395" cy="306" r="13"/>
-    </svg>
+    <div className="waste-guide" data-ui>
+      <div className="waste-guide-top">
+        <h3>Panduan pilah</h3>
+        <span>{status === 'ready' ? `${categories.length} kategori` : 'SIGAP'}</span>
+      </div>
+      {status === 'loading' && <p className="guide-message" role="status">Memuat kategori sampah…</p>}
+      {status === 'error' && <div className="guide-message" role="status">Panduan belum tersambung. <Link to="/login">Masuk ke SIGAP</Link> untuk menggunakan layanan.</div>}
+      {status === 'ready' && (
+        <>
+          <div className="waste-guide-options" role="group" aria-label="Pilih kategori sampah">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                aria-pressed={selectedId === category.id}
+                onClick={() => setSelectedId(category.id)}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+          {selected && <div className="waste-guide-result" aria-live="polite" key={selected.id}>
+            <h4>{selected.name}</h4>
+            <p>{selected.description}</p>
+            <p>{selected.handling_instruction}</p>
+          </div>}
+        </>
+      )}
+    </div>
   )
 }
 
-const services = [
-  { title: 'Pilah dengan lebih yakin', text: 'Unggah foto untuk mengenali kategori sampah dan membaca petunjuk penanganannya.' },
-  { title: 'Sampaikan masalah di sekitar', text: 'Buat laporan dengan lokasi dan foto, lalu ikuti perkembangannya sampai selesai.' },
-  { title: 'Ikuti jadwal blok Anda', text: 'Lihat jadwal angkut dan informasi lingkungan yang sesuai dengan tempat tinggal.' },
+const capabilities = [
+  { title: 'Pilah', copy: 'Unggah foto untuk mengenali kategori sampah dan memahami penanganannya.' },
+  { title: 'Jadwal', copy: 'Lihat waktu angkut yang berlaku untuk blok rumah Anda.' },
+  { title: 'Laporkan', copy: 'Kirim lokasi dan foto, lalu ikuti status sampai bukti penutupan.' },
+]
+
+const reportStages = [
+  { title: 'Menunggu', copy: 'Laporan warga masuk dengan lokasi dan foto.' },
+  { title: 'Sedang diproses', copy: 'Petugas menangani laporan dan memperbarui status.' },
+  { title: 'Selesai', copy: 'Foto bukti penutupan tersedia pada detail laporan.' },
 ]
 
 export default function Home() {
-  const workflowRef = useRef(null)
-  const [workflowVisible, setWorkflowVisible] = useState(false)
+  const pageRef = useRef(null)
+  const headlineRef = useRef(null)
+  const lenisRef = useLenisRef()
 
-  useEffect(() => {
-    const workflow = workflowRef.current
-    if (!workflow) return
+  useGSAP(() => {
+    const page = pageRef.current
+    const motionContext = gsap.matchMedia()
+    motionContext.add('(prefers-reduced-motion: no-preference)', () => {
+      const lines = headlineRef.current?.querySelectorAll('.waterline-line-copy')
+      if (!page || !lines || lines.length !== 2) return
 
-    if (!('IntersectionObserver' in window)) {
-      setWorkflowVisible(true)
+      page.classList.add('headline-intro-pending')
+      let intro
+      const revealHeadline = () => {
+        page.classList.remove('headline-intro-pending')
+        lines.forEach((line) => {
+          line.style.removeProperty('transform')
+          line.style.removeProperty('opacity')
+          line.style.removeProperty('visibility')
+        })
+      }
+      try {
+        intro = gsap.timeline({ onComplete: revealHeadline, onInterrupt: revealHeadline })
+        intro
+          .fromTo(lines, { yPercent: 110, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 1.1, stagger: 0.12, ease: 'expo.out' })
+          .fromTo('.waterline-intro', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.85, ease: 'power3.out' }, '-=0.24')
+          .fromTo('.waterline-wordmark, .waterline-actions a, .waterline-scroll', { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.65, stagger: 0.08, ease: 'power2.out' }, '-=0.18')
+      } catch {
+        intro?.kill()
+        revealHeadline()
+        return
+      }
+
+      gsap.to('.waterline-headline-parallax', {
+        y: -18,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.waterline-hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.8,
+        },
+      })
+
+      const revealItems = gsap.utils.toArray('[data-reveal]')
+      gsap.set(revealItems, { autoAlpha: 0, y: 20 })
+      ScrollTrigger.batch(revealItems, {
+        start: 'top 86%',
+        once: true,
+        onEnter: (elements) => gsap.to(elements, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.72,
+          stagger: 0.1,
+          ease: 'power3.out',
+          overwrite: true,
+        }),
+      })
+
+      return () => {
+        intro?.kill()
+        revealHeadline()
+      }
+    })
+
+    return () => {
+      motionContext.revert()
+      page?.classList.remove('headline-intro-pending')
+    }
+  }, { scope: pageRef, dependencies: [], revertOnUpdate: true })
+
+  const scrollToServices = (event) => {
+    event.preventDefault()
+    if (lenisRef?.current) {
+      lenisRef.current.scrollTo('#layanan', { offset: -16, duration: 1.05 })
       return
     }
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      setWorkflowVisible(true)
-      observer.disconnect()
-    }, { threshold: 0.35 })
-
-    observer.observe(workflow)
-    return () => observer.disconnect()
-  }, [])
+    document.querySelector('#layanan')?.scrollIntoView({ behavior: 'auto', block: 'start' })
+  }
 
   return (
-    <div className="landing-page">
-      <header className="landing-header">
-        <Link className="landing-brand" to="/" aria-label="SIGAP beranda"><BrandMark /><span><strong>SIGAP</strong><small>Rawat lingkungan bersama</small></span></Link>
-        <nav className="landing-nav" aria-label="Navigasi halaman">
-          <a href="#layanan">Layanan</a>
-          <a href="#cara-kerja">Cara kerja</a>
-          <Link className="landing-login" to="/login">Masuk</Link>
-          <Link className="landing-register" to="/daftar">Daftar warga</Link>
-        </nav>
-      </header>
-
+    <div className="sigap-home" ref={pageRef}>
       <main>
-        <section className="landing-hero">
-          <div className="landing-hero-copy">
-            <p className="landing-kicker"><span /> Layanan lingkungan perumahan</p>
-            <h1>Lingkungan yang terawat dimulai dari langkah <em>bersama.</em></h1>
-            <p className="landing-lede">SIGAP menghubungkan warga, petugas, dan pengelola untuk memilah sampah, menyampaikan laporan, dan menjaga jadwal angkut tetap jelas.</p>
-            <div className="landing-actions">
-              <Link to="/daftar" className="landing-primary">Mulai sebagai warga <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg></Link>
-              <Link to="/login" className="landing-secondary">Saya sudah punya akun</Link>
+        <section className="waterline-hero" aria-labelledby="home-title">
+          <div className="waterline-field" aria-hidden="true" />
+          <div className="waterline-nav">
+            <Link className="waterline-wordmark" to="/" aria-label="SIGAP beranda">SIGAP</Link>
+            <div className="waterline-actions">
+              <Link to="/login">Masuk</Link>
+              <Link className="waterline-register" to="/daftar">Daftar warga</Link>
             </div>
-            <p className="landing-caption">Satu ruang layanan untuk kebutuhan lingkungan di kawasan Anda.</p>
           </div>
-          <div className="landing-visual"><div className="visual-stamp">WARGA<br/>PETUGAS<br/>KAWASAN</div><FieldIllustration /><div className="visual-caption"><span className="visual-caption-dot"/> Terkoneksi di satu layanan</div></div>
+          <div className="waterline-headline-parallax" ref={headlineRef}>
+            <h1 className="waterline-title" id="home-title" aria-label="Sampah ada alurnya">
+              <span className="waterline-line-mask"><span className="waterline-line-copy waterline-line-first">SAMPAH</span></span>
+              <span className="waterline-line-mask"><span className="waterline-line-copy waterline-line-second">ADA ALURNYA</span></span>
+            </h1>
+          </div>
+          <p className="waterline-intro">SIGAP menghubungkan panduan pilah, jadwal angkut per blok, dan laporan warga dalam satu layanan lingkungan.</p>
+          <a className="waterline-scroll" href="#layanan" onClick={scrollToServices} aria-label="Lihat layanan SIGAP"><span />Lihat layanan</a>
         </section>
 
-        <section id="layanan" className="landing-services">
-          <div className="section-heading">
-            <div><h2>Hal kecil yang membuat lingkungan lebih teratur.</h2><p>Dari pemilahan harian sampai tindak lanjut laporan warga.</p></div>
-            <Link to="/daftar">Jelajahi layanan <span aria-hidden="true">→</span></Link>
+        <section className="capability-section" id="layanan" aria-labelledby="capability-heading">
+          <div className="capability-intro" data-reveal>
+            <h2 id="capability-heading">Satu kawasan.<br />Tiga langkah nyata.</h2>
+            <p>Mulai dari mengenali sampah di rumah sampai melihat tindak lanjut laporan lingkungan.</p>
           </div>
-          <div className="service-grid">
-            {services.map((service) => <article className="service-item" key={service.title}><span className="service-mark" aria-hidden="true"/><h3>{service.title}</h3><p>{service.text}</p></article>)}
+          <div className="capability-list">
+            {capabilities.map((item) => (
+              <article className="capability-row" key={item.title} data-reveal>
+                <h3>{item.title}</h3>
+                <p>{item.copy}</p>
+              </article>
+            ))}
           </div>
         </section>
 
-        <section id="cara-kerja" className="landing-how">
-          <div className="how-copy"><h2>Bergerak dari rumah, terhubung sebagai kawasan.</h2><p>Warga mendapatkan informasi yang relevan untuk bloknya. Petugas menindaklanjuti laporan di lapangan. Pengelola melihat kebutuhan layanan dan mengatur informasi kawasan.</p><Link to="/login">Masuk ke SIGAP <span aria-hidden="true">→</span></Link></div>
-          <div ref={workflowRef} className={`how-steps${workflowVisible ? ' is-in-view' : ''}`}><div><span className="step-dot step-leaf"/><strong>Warga</strong><p>Kenali, laporkan, pantau.</p></div><div><span className="step-dot step-clay"/><strong>Petugas</strong><p>Proses dan beri kabar.</p></div><div><span className="step-dot step-gold"/><strong>Pengelola</strong><p>Atur layanan kawasan.</p></div></div>
+        <section className="guide-section" aria-labelledby="guide-heading">
+          <div className="guide-copy" data-reveal>
+            <h2 id="guide-heading">Mulai dari jenisnya.</h2>
+            <p>Pilih kategori untuk membaca petunjuk penanganan yang digunakan SIGAP.</p>
+          </div>
+          <div data-reveal><WasteGuide /></div>
+        </section>
+
+        <section className="report-section" id="laporan" aria-labelledby="report-heading">
+          <div className="report-heading" data-reveal>
+            <h2 id="report-heading">Laporan, sampai selesai.</h2>
+            <p>Setiap tahap punya status yang bisa diikuti. Laporan yang selesai menyertakan foto bukti penutupan.</p>
+          </div>
+          <ol className="report-stages">
+            {reportStages.map((stage) => (
+              <li key={stage.title} data-reveal>
+                <h3>{stage.title}</h3>
+                <p>{stage.copy}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="public-cta" aria-labelledby="cta-heading">
+          <h2 id="cta-heading">Rawat kawasan<br />bersama SIGAP.</h2>
+          <div className="public-cta-choices">
+            <Link to="/daftar">Daftar sebagai warga</Link>
+            <span>atau</span>
+            <Link to="/login">Masuk ke akun</Link>
+          </div>
+          <p>Warga baru dapat membuat akun. Akun petugas dan pengelola disiapkan oleh administrator.</p>
         </section>
       </main>
 
-      <footer className="landing-footer"><Link className="landing-brand" to="/" aria-label="SIGAP beranda"><BrandMark /><span><strong>SIGAP</strong><small>Rawat lingkungan bersama</small></span></Link><p>Sistem Informasi Pengelolaan Sampah Perumahan</p><span>© SIGAP</span></footer>
+      <footer className="public-footer">
+        <Link className="public-footer-name" to="/" aria-label="SIGAP beranda">SIGAP</Link>
+        <div className="public-footer-bottom">
+          <p>Sistem Informasi Pengelolaan Sampah Perumahan</p>
+          <nav aria-label="Tautan layanan">
+            <a href="#layanan">Layanan</a>
+            <a href="#laporan">Cara kerja</a>
+            <Link to="/login">Masuk</Link>
+          </nav>
+          <a href="#home-title">Kembali ke atas ↑</a>
+        </div>
+      </footer>
     </div>
   )
 }

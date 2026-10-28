@@ -40,17 +40,18 @@ export default function AppShell({ children }) {
 
   const pageName = navItems.find((item) => location.pathname === item.to)?.label
     || (location.pathname.startsWith('/artikel/') ? 'Artikel lingkungan' : 'Detail laporan')
+  const homePath = user?.role === 'warga' ? '/beranda' : user?.role === 'petugas' ? '/petugas' : '/admin'
   const initials = (user?.name || 'SIGAP').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
 
   return (
     <div className="app-frame">
       <aside className="app-rail" aria-label="Navigasi utama">
-        <Link className="brand-lockup" to={user?.role === 'warga' ? '/beranda' : user?.role === 'petugas' ? '/petugas' : '/admin'}>
+        <Link className="brand-lockup" to={homePath}>
           <BrandMark />
           <span className="brand-copy"><span className="brand-name">SIGAP</span><span className="brand-caption">Rawat lingkungan bersama</span></span>
         </Link>
 
-        <div className="rail-label">Menu utama</div>
+        <div className="rail-label">Ruang kerja</div>
         <nav className="rail-nav">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className="rail-link" aria-label={item.label}>
@@ -60,10 +61,6 @@ export default function AppShell({ children }) {
         </nav>
 
         <div className="rail-grow" />
-        <div className="rail-note">
-          <div className="rail-note-title">Lingkungan terjaga, mulai dari rumah.</div>
-          <div className="rail-note-copy">Pilah dengan tepat, laporkan yang perlu, dan ikuti jadwal angkut di blok Anda.</div>
-        </div>
         <div className="rail-profile">
           <span className="profile-avatar" aria-hidden="true">{initials}</span>
           <div className="profile-copy"><div className="profile-name">{user?.name}</div><div className="profile-role">{user?.role}</div></div>
@@ -73,11 +70,18 @@ export default function AppShell({ children }) {
 
       <div className="app-workspace">
         <header className="app-topbar">
-          <div><div className="topbar-context">Sistem Informasi Pengelolaan Sampah</div><div className="topbar-greeting">{pageName}</div></div>
-          {user?.role === 'warga' && <div className="topbar-block"><span className="topbar-dot" /> Layanan warga aktif</div>}
+          <div className="topbar-title"><Link to={homePath} className="topbar-brand">SIGAP</Link><span aria-hidden="true">/</span><span className="topbar-greeting">{pageName}</span></div>
+          <div className="topbar-account"><span className="topbar-dot" />{user?.name || 'Pengguna'}<span className="topbar-role">{user?.role}</span></div>
         </header>
         <main id="main-content" className="app-main">{children}</main>
       </div>
+      <nav className="mobile-app-nav" aria-label="Navigasi utama">
+        {navItems.map((item) => (
+          <NavLink key={item.to} to={item.to} className="mobile-app-link">
+            <Icon name={item.icon} /><span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   )
 }

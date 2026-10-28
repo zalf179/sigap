@@ -11,9 +11,11 @@ import LaporanSaya from './pages/LaporanSaya.jsx'
 import DetailLaporan from './pages/DetailLaporan.jsx'
 import ArtikelDetail from './pages/ArtikelDetail.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
+import LenisProvider from './lib/LenisProvider.jsx'
 
 export default function App() {
   return (
+    <LenisProvider>
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
@@ -84,5 +86,6 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+    </LenisProvider>
   )
 }
