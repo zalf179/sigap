@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "db:init": "node db/init.js"
+    "db:init": "node db/init.js",
+    "admin:bootstrap": "node scripts/bootstrapAdmin.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

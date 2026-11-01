@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { query } from '../db/conn.js'
+import { jwtSecret } from '../middleware/auth.js'
 
 export async function register(req, res, next) {
   try {
@@ -40,7 +41,7 @@ export async function login(req, res, next) {
     }
     const token = jwt.sign(
       { id: user.id, name: user.name, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'sigap_secret_change_me',
+      jwtSecret,
       { expiresIn: '7d' }
     )
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } })

@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import mysql from 'mysql2/promise'
-import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -62,33 +61,11 @@ async function init() {
       `
     )
 
-    // Seed admin and petugas
-    const adminPass = await bcrypt.hash('Admin123!', 10)
-    const petugasPass = await bcrypt.hash('Petugas123!', 10)
-
-    const [adminExists] = await connection.query("SELECT id FROM users WHERE email = 'admin@sigap.local'")
-    if (adminExists.length === 0) {
-      await connection.query(
-        'INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)',
-        ['Admin SIGAP', 'admin@sigap.local', '081234567890', adminPass, 'admin']
-      )
-      console.log('Admin berhasil dibuat (admin@sigap.local / Admin123!)')
-    }
-
-    const [petugasExists] = await connection.query("SELECT id FROM users WHERE email = 'petugas@sigap.local'")
-    if (petugasExists.length === 0) {
-      await connection.query(
-        'INSERT INTO users (name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, ?)',
-        ['Petugas SIGAP', 'petugas@sigap.local', '081234567891', petugasPass, 'petugas']
-      )
-      console.log('Petugas berhasil dibuat (petugas@sigap.local / Petugas123!)')
-    }
-
-    // Seed sample articles
+    // Seed sample articles only when an administrator exists to own them.
+    const [adminUsers] = await connection.query("SELECT id FROM users WHERE role = 'admin' ORDER BY id LIMIT 1")
     const [articles] = await connection.query('SELECT COUNT(*) as cnt FROM articles')
-    if (articles[0].cnt === 0) {
-      const [adminUser] = await connection.query("SELECT id FROM users WHERE email = 'admin@sigap.local'")
-      const authorId = adminUser[0].id
+    if (articles[0].cnt === 0 && adminUsers.length > 0) {
+      const authorId = adminUsers[0].id
       await connection.query(
         `INSERT INTO articles (title, slug, content, author_id) VALUES
         ('Cara Memisahkan Sampah di Rumah', 'cara-memisahkan-sampah-di-rumah', 'Pisahkan sampah menjadi organik, anorganik, dan B3. Sampah organik bisa kompos. Anorganik bisa didaur ulang. B3 harus diserahkan terpisah ke petugas.', ?),

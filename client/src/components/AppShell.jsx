@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -21,10 +22,20 @@ export default function AppShell({ children }) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+  const logoutDialogRef = useRef(null)
 
-  const handleLogout = () => {
+  useEffect(() => {
+    const dialog = logoutDialogRef.current
+    if (logoutDialogOpen && dialog && !dialog.open) dialog.showModal()
+    if (!logoutDialogOpen && dialog?.open) dialog.close()
+  }, [logoutDialogOpen])
+
+  const confirmLogout = () => {
+    logoutDialogRef.current?.close()
+    setLogoutDialogOpen(false)
     logout()
-    navigate('/login')
+    navigate('/login', { replace: true })
   }
 
   const navItems = user?.role === 'warga'
@@ -64,14 +75,17 @@ export default function AppShell({ children }) {
         <div className="rail-profile">
           <span className="profile-avatar" aria-hidden="true">{initials}</span>
           <div className="profile-copy"><div className="profile-name">{user?.name}</div><div className="profile-role">{user?.role}</div></div>
-          <button type="button" onClick={handleLogout} className="logout-button" aria-label="Keluar dari SIGAP" title="Keluar"><Icon name="logout" /></button>
+          <button type="button" onClick={() => setLogoutDialogOpen(true)} className="logout-button" aria-label="Keluar dari SIGAP" title="Keluar"><Icon name="logout" /></button>
         </div>
       </aside>
 
       <div className="app-workspace">
         <header className="app-topbar">
           <div className="topbar-title"><Link to={homePath} className="topbar-brand">SIGAP</Link><span aria-hidden="true">/</span><span className="topbar-greeting">{pageName}</span></div>
-          <div className="topbar-account"><span className="topbar-dot" />{user?.name || 'Pengguna'}<span className="topbar-role">{user?.role}</span></div>
+          <div className="topbar-account"><span className="topbar-dot" /><span className="topbar-account-name">{user?.name || 'Pengguna'}</span><span className="topbar-role">{user?.role}</span></div>
+          <button type="button" onClick={() => setLogoutDialogOpen(true)} className="mobile-topbar-logout" aria-label="Keluar dari SIGAP">
+            <Icon name="logout" /><span>Keluar</span>
+          </button>
         </header>
         <main id="main-content" className="app-main">{children}</main>
       </div>
@@ -82,6 +96,24 @@ export default function AppShell({ children }) {
           </NavLink>
         ))}
       </nav>
+
+      <dialog
+        ref={logoutDialogRef}
+        className="logout-confirm-dialog"
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+        onCancel={() => setLogoutDialogOpen(false)}
+        onClose={() => setLogoutDialogOpen(false)}
+      >
+        <div className="logout-confirm-content">
+          <h2 id="logout-dialog-title">Keluar dari akun?</h2>
+          <p id="logout-dialog-description">Anda perlu masuk kembali untuk menggunakan SIGAP.</p>
+          <div className="logout-confirm-actions">
+            <button type="button" className="logout-cancel-button" autoFocus onClick={() => setLogoutDialogOpen(false)}>Batal</button>
+            <button type="button" className="logout-confirm-button" onClick={confirmLogout}>Ya, keluar</button>
+          </div>
+        </div>
+      </dialog>
     </div>
   )
 }

@@ -8,6 +8,11 @@ const __dirname = path.dirname(__filename)
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
+export const jwtSecret = process.env.JWT_SECRET
+if (!jwtSecret || jwtSecret.length < 32 || jwtSecret === 'replace-with-a-long-random-secret') {
+  throw new Error('JWT_SECRET must be configured with a random secret of at least 32 characters')
+}
+
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || ''
   const token = header.startsWith('Bearer ') ? header.slice(7) : null
@@ -15,7 +20,7 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Tidak ada token autentikasi' })
   }
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'sigap_secret_change_me')
+    const payload = jwt.verify(token, jwtSecret)
     req.user = payload
     next()
   } catch (e) {
