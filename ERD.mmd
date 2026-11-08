@@ -1,0 +1,69 @@
+erDiagram
+    BLOCKS {
+        INT id PK
+        VARCHAR name
+    }
+
+    USERS {
+        INT id PK
+        VARCHAR name
+        VARCHAR email UK
+        VARCHAR phone
+        VARCHAR password_hash
+        ENUM role
+        INT block_id FK
+        VARCHAR house_number
+        TIMESTAMP created_at
+    }
+
+    WASTE_CATEGORIES {
+        INT id PK
+        VARCHAR name
+        TEXT description
+        TEXT handling_instruction
+    }
+
+    REPORTS {
+        INT id PK
+        VARCHAR ticket_number UK
+        INT user_id FK
+        INT block_id FK
+        TEXT landmark
+        INT category_id FK
+        VARCHAR photo_path
+        ENUM status
+        INT handled_by FK
+        DATETIME processed_at
+        DATETIME completed_at
+        VARCHAR proof_photo_path
+        TIMESTAMP created_at
+    }
+
+    ARTICLES {
+        INT id PK
+        VARCHAR title
+        VARCHAR slug UK
+        LONGTEXT content
+        VARCHAR cover_path
+        INT author_id FK
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    PICKUP_SCHEDULES {
+        INT id PK
+        INT block_id FK
+        ENUM day_of_week
+        TIME time_start
+        TIME time_end
+        VARCHAR waste_type
+        TEXT notes
+    }
+
+    BLOCKS ||--o{ USERS : "menaungi warga"
+    BLOCKS ||--o{ REPORTS : "menjadi lokasi laporan"
+    BLOCKS ||--o{ PICKUP_SCHEDULES : "memiliki jadwal"
+    USERS ||--o{ REPORTS : "mengirimkan"
+    USERS o|--o{ REPORTS : "menangani"
+    WASTE_CATEGORIES ||--o{ REPORTS : "mengategorikan"
+    USERS ||--o{ ARTICLES : "menulis"

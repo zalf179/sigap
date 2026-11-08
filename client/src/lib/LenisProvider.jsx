@@ -10,6 +10,16 @@ const LenisContext = createContext(null)
 
 const isPublicPath = (pathname) => pathname === '/' || pathname === '/daftar'
 
+function clearLenisDomState() {
+  for (const element of [document.documentElement, document.body]) {
+    if (!element) continue
+    for (const className of Array.from(element.classList)) {
+      if (className === 'lenis' || className.startsWith('lenis-')) element.classList.remove(className)
+    }
+    element.style.removeProperty('overflow')
+  }
+}
+
 export function useLenisRef() {
   return useContext(LenisContext)
 }
@@ -17,65 +27,65 @@ export function useLenisRef() {
 export default function LenisProvider({ children }) {
   const { pathname } = useLocation()
   const lenisRef = useRef(null)
-  const pathnameRef = useRef(pathname)
-  pathnameRef.current = pathname
 
   useEffect(() => {
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let lenis = null
     let tickerCallback
     let scrollCallback
-
-    const createLenis = () => {
-      if (motionQuery.matches || lenisRef.current) return
-
-      const lenis = new Lenis({ autoRaf: false, smoothWheel: true })
-      lenisRef.current = lenis
-      scrollCallback = () => ScrollTrigger.update()
-      tickerCallback = (time) => lenis.raf(time * 1000)
-      lenis.on('scroll', scrollCallback)
-      gsap.ticker.add(tickerCallback)
-      gsap.ticker.lagSmoothing(0)
-
-      if (!isPublicPath(pathnameRef.current)) lenis.stop()
-    }
+    let refreshFrame
+    let changedTickerSmoothing = false
 
     const destroyLenis = () => {
-      const lenis = lenisRef.current
-      if (!lenis) return
-      lenis.off('scroll', scrollCallback)
-      gsap.ticker.remove(tickerCallback)
-      lenis.destroy()
-      lenisRef.current = null
-      scrollCallback = undefined
-      tickerCallback = undefined
-      gsap.ticker.lagSmoothing(500, 33)
+      if (lenis) {
+        if (scrollCallback) lenis.off('scroll', scrollCallback)
+        if (tickerCallback) gsap.ticker.remove(tickerCallback)
+        lenis.destroy()
+        if (lenisRef.current === lenis) lenisRef.current = null
+        lenis = null
+        scrollCallback = undefined
+        tickerCallback = undefined
+      }
+
+      if (changedTickerSmoothing) {
+        gsap.ticker.lagSmoothing(500, 33)
+        changedTickerSmoothing = false
+      }
+
+      clearLenisDomState()
     }
+
+    const createLenis = () => {
+      if (!isPublicPath(pathname) || motionQuery.matches || lenis) return
+
+      const instance = new Lenis({ autoRaf: false, smoothWheel: true })
+      lenis = instance
+      lenisRef.current = instance
+      scrollCallback = () => ScrollTrigger.update()
+      tickerCallback = (time) => instance.raf(time * 1000)
+      instance.on('scroll', scrollCallback)
+      gsap.ticker.add(tickerCallback)
+      gsap.ticker.lagSmoothing(0)
+      changedTickerSmoothing = true
+    }
+
+    window.scrollTo(0, 0)
+    createLenis()
 
     const handleMotionChange = () => {
       if (motionQuery.matches) destroyLenis()
       else createLenis()
+      ScrollTrigger.refresh()
     }
 
-    createLenis()
     motionQuery.addEventListener('change', handleMotionChange)
+    refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh())
+
     return () => {
       motionQuery.removeEventListener('change', handleMotionChange)
+      if (refreshFrame !== undefined) window.cancelAnimationFrame(refreshFrame)
       destroyLenis()
     }
-  }, [])
-
-  useEffect(() => {
-    const lenis = lenisRef.current
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true, force: true })
-      if (isPublicPath(pathname)) lenis.start()
-      else lenis.stop()
-    } else {
-      window.scrollTo(0, 0)
-    }
-
-    const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh())
-    return () => window.cancelAnimationFrame(refreshFrame)
   }, [pathname])
 
   return <LenisContext.Provider value={lenisRef}>{children}</LenisContext.Provider>

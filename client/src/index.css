@@ -283,11 +283,11 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
 /* Sign-in surfaces use the garden's quiet, tactile palette without changing the flow. */
 .auth-page { display: grid; min-height: 100vh; grid-template-columns: minmax(0, 1.1fr) minmax(380px, .9fr); background: var(--paper); }
-.auth-story { position: relative; display: flex; min-height: 100vh; flex-direction: column; justify-content: space-between; overflow: hidden; padding: clamp(32px, 6vw, 82px); color: #f5f1e5; background: var(--soil); }
+.auth-story { position: relative; isolation: isolate; display: flex; min-height: 100vh; flex-direction: column; justify-content: space-between; overflow: hidden; padding: clamp(32px, 6vw, 82px); color: #f5f1e5; background: var(--soil); }
 .auth-story::before, .auth-story::after { position: absolute; right: -100px; bottom: -185px; width: 530px; height: 530px; border: 1px solid rgba(221,231,210,.13); border-radius: 50%; content: ''; }
 .auth-story::after { right: -52px; bottom: -137px; width: 434px; height: 434px; border-color: rgba(221,231,210,.09); }
-.auth-story-brand { z-index: 1; display: flex; align-items: center; gap: 12px; }
-.auth-story-copy { z-index: 1; max-width: 560px; padding: 80px 0 100px; }
+.auth-story-brand { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; }
+.auth-story-copy { position: relative; z-index: 1; max-width: 560px; padding: 80px 0 100px; }
 .auth-story-copy h2 { margin: 0 0 22px; color: #f8f3e3; font-family: 'Newsreader', Georgia, serif; font-size: clamp(42px, 5.4vw, 76px); font-weight: 500; letter-spacing: -.055em; line-height: .99; }
 .auth-story-copy p { max-width: 410px; color: #c5d0be; font-size: 15px; line-height: 1.7; }
 .garden-beds { display: grid; width: min(390px, 100%); grid-template-columns: 1.3fr .75fr 1fr; gap: 7px; margin-top: 35px; transform: rotate(-4deg); }
@@ -412,23 +412,19 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }
 
 /* Shared auth surfaces: keep the copy and existing palette, with one field treatment. */
-.auth-story-copy { padding: clamp(34px, 6vh, 68px) 0 clamp(230px, 30vh, 310px); }
-.auth-story-foot { position: relative; z-index: 2; }
+.auth-story-copy { padding: clamp(34px, 6vh, 68px) 0 0; }
+.auth-story-foot { position: relative; z-index: 1; }
 .auth-scene {
   position: absolute;
-  bottom: clamp(68px, 10vh, 94px);
-  left: 50%;
-  z-index: 1;
+  inset: 0;
+  z-index: 0;
   display: block;
-  width: min(640px, calc(100% - 64px));
-  height: auto;
-  overflow: visible;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: hidden;
   pointer-events: none;
-  transform: translateX(-50%);
 }
-.scene-block { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; font-size: 11px; font-weight: 700; }
-.scene-pin-label { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; font-size: 8px; font-weight: 700; }
-.scene-truck-label { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; font-size: 8px; font-weight: 800; letter-spacing: .4px; }
 .auth-panel form { gap: 8px 16px; }
 .auth-panel .auth-field { display: grid; min-width: 0; align-content: start; gap: 6px; }
 .auth-panel .auth-control {
@@ -491,17 +487,7 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .auth-register .auth-panel form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
 .auth-register .auth-panel form > button { grid-column: 1 / -1; margin-top: 1px; }
 
-@media (prefers-reduced-motion: no-preference) {
-  .scene-truck { transform-box: fill-box; transform-origin: center; animation: kawasan-drive 22s linear infinite; }
-  .scene-plant { transform-box: view-box; transform-origin: 618px 224px; animation: kawasan-sway 4s ease-in-out infinite alternate; }
-  .scene-block-highlight { transform-box: fill-box; transform-origin: center; animation: kawasan-sign-pulse 3s ease-in-out infinite alternate; }
-  @keyframes kawasan-drive { from { transform: translateX(-115px); } to { transform: translateX(680px); } }
-  @keyframes kawasan-sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
-  @keyframes kawasan-sign-pulse { from { transform: scale(1); opacity: .9; } to { transform: scale(1.05); opacity: 1; } }
-}
-
 @media (max-width: 767px) {
-  .auth-scene { display: none; }
   .auth-story-copy { padding: 42px 0 16px; }
 }
 
@@ -753,13 +739,16 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .public-cta-choices a:hover { background: #e8f0e5; transform: translateY(-2px); }
 .public-cta-choices span { color: #e2ebdf; font-size: 15px; }
 .public-cta > p { max-width: 52ch; margin: 0; color: #e2ebdf; font-size: 14px; line-height: 1.5; }
-.public-footer { padding: 0 clamp(20px, 4vw, 60px) 24px; background: var(--page-paper); }
-.public-footer-name { display: block; overflow: hidden; color: var(--page-field); font-family: 'Newsreader', Georgia, serif; font-size: clamp(130px, 26vw, 380px); font-weight: 500; letter-spacing: -.105em; line-height: .73; text-decoration: none; transform: translateX(-.035em); }
-.public-footer-bottom { display: grid; grid-template-columns: 1.1fr 1fr auto; align-items: end; gap: 24px; padding-top: 28px; }
-.public-footer-bottom p { max-width: 34ch; margin: 0; color: var(--page-muted); font-size: 13px; line-height: 1.4; }
+.public-footer { position: relative; display: flex; width: 100%; min-height: clamp(560px, 70vh, 960px); flex-direction: column; justify-content: flex-end; overflow: hidden; margin: 0; padding: 0; background: var(--page-field); }
+.public-footer-wallpaper-frame { position: absolute; z-index: 0; inset: 0; overflow: hidden; }
+.public-footer-wallpaper { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; pointer-events: none; }
+.public-footer::after { position: absolute; z-index: 1; inset: 58% 0 0; background: linear-gradient(to bottom, rgba(23, 37, 27, 0) 0%, rgba(23, 37, 27, .76) 42%, rgba(23, 37, 27, .76) 100%); content: ''; pointer-events: none; }
+.public-footer-bottom { position: relative; z-index: 2; display: grid; width: 100%; grid-template-columns: 1.1fr 1fr auto; align-items: end; gap: 24px; margin-top: auto; padding: clamp(26px, 4vw, 60px); color: var(--page-paper); }
+.public-footer-bottom p { max-width: 34ch; margin: 0; color: var(--page-paper); font-size: 13px; line-height: 1.4; }
 .public-footer-bottom nav { display: flex; flex-wrap: wrap; gap: 22px; font-size: 14px; }
-.public-footer-bottom a { color: var(--page-ink); text-decoration: none; }
-.public-footer-bottom a:hover { color: var(--page-field); }
+.public-footer-bottom a { color: var(--page-paper); text-decoration: none; }
+.public-footer-bottom a:hover { opacity: .78; text-decoration: underline; }
+.public-footer-bottom a:focus-visible { outline: 3px solid #e7bd59; outline-offset: 5px; }
 
 @media (max-width: 760px) {
   .waterline-hero { height: 100svh; min-height: 680px; max-height: 940px; }
@@ -798,12 +787,11 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   .public-cta h2 { max-width: 9ch; font-size: clamp(70px, 16vw, 108px); }
   .public-cta-choices { flex-direction: column; gap: 13px; padding: 30px 0; }
   .public-cta-choices a { width: min(100%, 310px); min-height: 52px; }
-  .public-footer { padding-inline: 18px; }
-  .public-footer-name { font-size: 29vw; }
-  .public-footer-bottom { grid-template-columns: 1fr auto; align-items: start; gap: 17px 12px; padding-top: 23px; }
-  .public-footer-bottom p { grid-column: 1 / -1; font-size: 12px; }
+  .public-footer { min-height: max(55svh, 430px); }
+  .public-footer-bottom { grid-template-columns: 1fr; align-items: start; gap: 17px; padding: 24px 18px; }
+  .public-footer-bottom p { font-size: 12px; }
   .public-footer-bottom nav { gap: 14px; font-size: 13px; }
-  .public-footer-bottom > a { justify-self: end; font-size: 12px; }
+  .public-footer-bottom > a { justify-self: start; font-size: 12px; }
 }
 @media (max-width: 380px) {
   .waterline-title { font-size: clamp(38px, 10.1vw, 40px); }

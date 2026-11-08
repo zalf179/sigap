@@ -185,6 +185,15 @@ export default function Home() {
     document.querySelector('#layanan')?.scrollIntoView({ behavior: 'auto', block: 'start' })
   }
 
+  const scrollToTop = (event) => {
+    event.preventDefault()
+    if (lenisRef?.current) {
+      lenisRef.current.scrollTo(0, { duration: 1.05 })
+      return
+    }
+    document.querySelector('#home-title')?.scrollIntoView({ behavior: 'auto', block: 'start' })
+  }
+
   return (
     <div className="sigap-home" ref={pageRef}>
       <main>
@@ -257,7 +266,18 @@ export default function Home() {
       </main>
 
       <footer className="public-footer">
-        <Link className="public-footer-name" to="/" aria-label="SIGAP beranda">SIGAP</Link>
+        <div className="public-footer-wallpaper-frame">
+          <img
+            className="public-footer-wallpaper"
+            src="/images/footer-wallpaper.webp"
+            alt=""
+            aria-hidden="true"
+            width="2400"
+            height="1600"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
         <div className="public-footer-bottom">
           <p>Sistem Informasi Pengelolaan Sampah Perumahan</p>
           <nav aria-label="Tautan layanan">
@@ -265,7 +285,7 @@ export default function Home() {
             <a href="#laporan">Cara kerja</a>
             <Link to="/login">Masuk</Link>
           </nav>
-          <a href="#home-title">Kembali ke atas ↑</a>
+          <a href="#home-title" onClick={scrollToTop}>Kembali ke atas ↑</a>
         </div>
       </footer>
     </div>
