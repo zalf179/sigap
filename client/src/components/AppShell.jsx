@@ -7,6 +7,7 @@ const paths = {
   identify: <><path d="M12 3 4.5 6v5.2c0 4.7 3.2 8.2 7.5 9.8 4.3-1.6 7.5-5.1 7.5-9.8V6L12 3Z"/><path d="m9 12 2 2 4-4"/></>,
   report: <><path d="M12 4v12M7 9l5-5 5 5"/><path d="M5 14v5h14v-5"/></>,
   list: <><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></>,
+  schedule: <><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></>,
   logout: <><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></>,
 }
 
@@ -46,11 +47,16 @@ export default function AppShell({ children }) {
         { to: '/laporan-saya', label: 'Laporan saya', icon: 'list' },
       ]
     : user?.role === 'petugas'
-      ? [{ to: '/petugas', label: 'Laporan warga', icon: 'list' }]
+      ? [
+          { to: '/petugas', label: 'Laporan warga', icon: 'list' },
+          { to: '/petugas/jadwal', label: 'Jadwal angkut', icon: 'schedule' },
+        ]
       : [{ to: '/admin', label: 'Dasbor pengelola', icon: 'home' }]
 
   const pageName = navItems.find((item) => location.pathname === item.to)?.label
-    || (location.pathname.startsWith('/artikel/') ? 'Artikel lingkungan' : 'Detail laporan')
+    || (location.pathname.startsWith('/admin/artikel/')
+      ? 'Edit artikel'
+      : location.pathname.startsWith('/artikel/') ? 'Artikel lingkungan' : 'Detail laporan')
   const homePath = user?.role === 'warga' ? '/beranda' : user?.role === 'petugas' ? '/petugas' : '/admin'
   const initials = (user?.name || 'SIGAP').split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
 

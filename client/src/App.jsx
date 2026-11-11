@@ -4,6 +4,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import BerandaWarga from './pages/BerandaWarga.jsx'
 import PetugasDashboard from './pages/PetugasDashboard.jsx'
+import PetugasSchedules from './pages/PetugasSchedules.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminArticleEdit from './pages/admin/AdminArticleEdit.jsx'
 import Identifikasi from './pages/Identifikasi.jsx'
@@ -74,6 +75,14 @@ export default function App() {
         element={
           <ProtectedRoute roles={['petugas']}>
             <PetugasDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/petugas/jadwal"
+        element={
+          <ProtectedRoute roles={['petugas']}>
+            <PetugasSchedules />
           </ProtectedRoute>
         }
       />

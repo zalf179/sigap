@@ -5,7 +5,7 @@ import { publicMySchedule, adminListSchedules, createSchedule, updateSchedule, d
 const router = express.Router()
 
 router.get('/mine', requireAuth, requireRole('warga'), publicMySchedule)
-router.get('/admin', requireAuth, requireRole('admin'), adminListSchedules)
+router.get('/admin', requireAuth, requireRole('admin', 'petugas'), adminListSchedules)
 router.post('/', requireAuth, requireRole('admin'), createSchedule)
 router.put('/:id', requireAuth, requireRole('admin'), updateSchedule)
 router.delete('/:id', requireAuth, requireRole('admin'), deleteSchedule)
