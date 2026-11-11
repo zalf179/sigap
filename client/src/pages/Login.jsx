@@ -48,6 +48,10 @@ export default function Login() {
           </AuthField>
           <button type="submit" disabled={loading}>{loading ? 'Memeriksa akun…' : 'Masuk ke SIGAP'}</button>
         </form>
+        <details className="auth-help">
+          <summary>Lupa kata sandi?</summary>
+          <p>Kata sandi hanya dapat direset oleh pengelola SIGAP. Hubungi petugas atau admin kawasan Anda dengan menyebutkan nama dan email terdaftar, lalu Anda akan diberi kata sandi sementara untuk masuk kembali.</p>
+        </details>
         <div className="auth-switch">
           Belum punya akun? <Link to="/daftar">Daftar sebagai warga</Link>
         </div>
