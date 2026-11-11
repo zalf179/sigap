@@ -1,8 +1,7 @@
 fastapi
 uvicorn
 python-multipart
-keras>=3
-tensorflow
-huggingface_hub
+transformers>=4.50
+torch>=2.10
 numpy
 Pillow

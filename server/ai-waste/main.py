@@ -3,15 +3,13 @@
 import io
 import json
 import logging
-import os
 from pathlib import Path
 from threading import Lock
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-import numpy as np
+import torch
 from PIL import Image, UnidentifiedImageError
-
-os.environ.setdefault("KERAS_BACKEND", "tensorflow")
+from transformers import AutoImageProcessor, SiglipForImageClassification
 
 BASE_DIR = Path(__file__).resolve().parent
 with (BASE_DIR / "model-config.json").open(encoding="utf-8") as config_file:
@@ -35,36 +33,47 @@ if EXTRA_MAPPINGS:
     LOGGER.warning("Mapping kelas tidak dipakai model ini: %s", ", ".join(EXTRA_MAPPINGS))
 
 app = FastAPI(title="SIGAP AI Waste Service", version="1.0")
+_processor = None
 _classifier = None
 _classifier_lock = Lock()
 
 
 def get_classifier():
-    global _classifier
+    global _processor, _classifier
     if _classifier is None:
         with _classifier_lock:
             if _classifier is None:
                 print(f"Memuat model klasifikasi {MODEL_ID}...", flush=True)
-                import keras
-
-                _classifier = keras.saving.load_model(f"hf://{MODEL_ID}")
+                _processor = AutoImageProcessor.from_pretrained(MODEL_ID)
+                _classifier = SiglipForImageClassification.from_pretrained(MODEL_ID)
+                _classifier.eval()
                 print("Model klasifikasi siap.", flush=True)
-    return _classifier
+    return _processor, _classifier
+
+
+def label_for_index(id2label, index: int) -> str | None:
+    return id2label.get(index) or id2label.get(str(index))
 
 
 def validate_model_output(model) -> None:
-    output_shape = model.output_shape
-    if isinstance(output_shape, list) or not output_shape or output_shape[-1] != len(LABELS):
+    id2label = getattr(model.config, "id2label", None) or {}
+    model_labels = {label for label in id2label.values() if label}
+    if not model_labels:
+        raise RuntimeError("Model tidak menyertakan daftar label (id2label) pada konfigurasinya.")
+
+    missing = sorted(set(LABELS) - model_labels)
+    extra = sorted(model_labels - set(LABELS))
+    if missing or extra:
         raise RuntimeError(
-            f"Jumlah keluaran model ({output_shape}) tidak cocok dengan "
-            f"{len(LABELS)} label pada model-config.json."
+            "Label model tidak cocok dengan model-config.json. "
+            f"Kurang: {missing or '-'}. Berlebih: {extra or '-'}."
         )
 
 
 @app.on_event("startup")
 def load_and_validate_model() -> None:
     try:
-        model = get_classifier()
+        _, model = get_classifier()
         validate_model_output(model)
         LOGGER.info("Model %s siap dengan %s label dan mapping lengkap.", MODEL_ID, len(LABELS))
     except Exception:
@@ -91,32 +100,40 @@ async def identify(file: UploadFile = File(...)):
     try:
         image = Image.open(io.BytesIO(contents))
         image.verify()
-        image = Image.open(io.BytesIO(contents)).convert("RGB").resize((224, 224))
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
     except (UnidentifiedImageError, OSError, ValueError):
         raise HTTPException(status_code=400, detail="File bukan gambar yang valid.")
 
     try:
-        model_input = np.expand_dims(np.asarray(image, dtype=np.float32), axis=0)
-        results = get_classifier().predict(model_input, verbose=0)
+        processor, model = get_classifier()
+        inputs = processor(images=image, return_tensors="pt")
+        with torch.no_grad():
+            logits = model(**inputs).logits
+        probabilities = torch.nn.functional.softmax(logits, dim=1)[0].cpu()
     except Exception as error:
         print(f"Klasifikasi gambar gagal: {error!r}", flush=True)
         raise HTTPException(status_code=503, detail="Model identifikasi sampah gagal memproses gambar.")
 
-    probabilities = np.asarray(results)[0]
-    if probabilities.size != len(LABELS):
+    id2label = model.config.id2label or {}
+    if probabilities.numel() != len(id2label):
         raise HTTPException(status_code=503, detail="Jumlah keluaran model tidak cocok dengan daftar label.")
-    top_indices = np.argsort(probabilities)[-3:][::-1]
+
+    top_count = min(3, probabilities.numel())
+    top_probabilities, top_indices = torch.topk(probabilities, top_count)
     top3 = []
-    for index in top_indices:
-        label = LABELS[int(index)]
-        mapping = CLASS_MAPPINGS.get(label)
+    for probability, index in zip(top_probabilities.tolist(), top_indices.tolist()):
+        label = label_for_index(id2label, index)
+        if not label:
+            raise HTTPException(status_code=503, detail="Label hasil model tidak dikenali.")
+        mapping = CLASS_MAPPINGS.get(label) or {}
+        confidence_text = f"{probability * 100:.2f}%".replace(".", ",")
         top3.append({
             "model_label": label,
-            "label_display": mapping.get("label_display") if mapping else None,
-            "category": mapping.get("category") if mapping else None,
-            "handling_instruction": mapping.get("handling_instruction") if mapping else None,
-            "confidence": float(probabilities[index]),
-            "confidence_text": f"{float(probabilities[index]) * 100:.2f}%".replace(".", ","),
+            "label_display": mapping.get("label_display") or label,
+            "category": mapping.get("category"),
+            "handling_instruction": mapping.get("handling_instruction"),
+            "confidence": float(probability),
+            "confidence_text": confidence_text,
         })
 
     best = top3[0]

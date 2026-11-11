@@ -3,7 +3,7 @@
 ## Stack
 - Frontend: Vite + React + React Router + Tailwind CSS
 - Backend: Node.js + Express (REST API) di folder `/server`
-- AI classifier: FastAPI + TensorFlow/Keras di folder `/server/ai-waste`
+- AI classifier: FastAPI + PyTorch/Transformers di folder `/server/ai-waste`
 - Database: MySQL
 
 ## Menjalankan dengan Docker Compose

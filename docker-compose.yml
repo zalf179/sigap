@@ -41,7 +41,6 @@ services:
     restart: unless-stopped
     environment:
       HF_HOME: /root/.cache/huggingface
-      KERAS_BACKEND: tensorflow
     volumes:
       - model-cache:/root/.cache/huggingface
     healthcheck:
