@@ -5,6 +5,7 @@ import {
   publicListArticles,
   publicGetArticle,
   adminListArticles,
+  adminGetArticle,
   createArticle,
   updateArticle,
   deleteArticle
@@ -15,6 +16,7 @@ const router = express.Router()
 router.get('/public', publicListArticles)
 router.get('/public/:slug', publicGetArticle)
 router.get('/admin', requireAuth, requireRole('admin'), adminListArticles)
+router.get('/admin/:id', requireAuth, requireRole('admin'), adminGetArticle)
 router.post('/', requireAuth, requireRole('admin'), uploadArticle.single('cover'), createArticle)
 router.put('/:id', requireAuth, requireRole('admin'), uploadArticle.single('cover'), updateArticle)
 router.delete('/:id', requireAuth, requireRole('admin'), deleteArticle)

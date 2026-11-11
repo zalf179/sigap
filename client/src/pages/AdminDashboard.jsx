@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import AppShell from '../components/AppShell'
 import AdminArticles from './admin/AdminArticles'
 import AdminSchedules from './admin/AdminSchedules'
@@ -6,18 +7,27 @@ import AdminUsers from './admin/AdminUsers'
 import AdminStats from './admin/AdminStats'
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('statistik')
-  const tabRefs = useRef([])
   const tabs = [
     { id: 'statistik', label: 'Ringkasan' },
     { id: 'artikel', label: 'Artikel' },
     { id: 'jadwal', label: 'Jadwal angkut' },
     { id: 'pengguna', label: 'Pengguna' },
   ]
+  const [searchParams, setSearchParams] = useSearchParams()
+  const requestedTab = searchParams.get('tab')
+  const [tab, setTab] = useState(
+    tabs.some((item) => item.id === requestedTab) ? requestedTab : 'statistik'
+  )
+  const tabRefs = useRef([])
+
+  const changeTab = (id) => {
+    setTab(id)
+    setSearchParams(id === 'statistik' ? {} : { tab: id }, { replace: true })
+  }
 
   const selectTab = (index) => {
     const nextIndex = (index + tabs.length) % tabs.length
-    setTab(tabs[nextIndex].id)
+    changeTab(tabs[nextIndex].id)
     tabRefs.current[nextIndex]?.focus()
   }
 
@@ -45,7 +55,7 @@ export default function AdminDashboard() {
       </div>
       <div className="admin-tabs" role="tablist" aria-label="Bagian pengelolaan">
         {tabs.map((item, index) => (
-          <button key={item.id} ref={(element) => { tabRefs.current[index] = element }} id={`admin-tab-${item.id}`} type="button" role="tab" tabIndex={tab === item.id ? 0 : -1} aria-selected={tab === item.id} aria-controls="admin-panel" onKeyDown={(event) => handleTabKeyDown(event, index)} onClick={() => setTab(item.id)} className={tab === item.id ? 'admin-tab is-active' : 'admin-tab'}>
+          <button key={item.id} ref={(element) => { tabRefs.current[index] = element }} id={`admin-tab-${item.id}`} type="button" role="tab" tabIndex={tab === item.id ? 0 : -1} aria-selected={tab === item.id} aria-controls="admin-panel" onKeyDown={(event) => handleTabKeyDown(event, index)} onClick={() => changeTab(item.id)} className={tab === item.id ? 'admin-tab is-active' : 'admin-tab'}>
             {item.label}
           </button>
         ))}

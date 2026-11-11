@@ -1,28 +1,20 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import useAdminResource from './useAdminResource'
 import AdminResourceMessage from './AdminResourceMessage'
 
 export default function AdminArticles() {
+  const navigate = useNavigate()
   const resource = useAdminResource('/articles/admin')
   const articles = resource.data?.articles || []
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ title: '', content: '' })
   const [file, setFile] = useState(null)
-  const [editId, setEditId] = useState(null)
   const [error, setError] = useState('')
 
   const openCreate = () => {
-    setEditId(null)
     setForm({ title: '', content: '' })
-    setFile(null)
-    setShowForm(true)
-    setError('')
-  }
-
-  const openEdit = (a) => {
-    setEditId(a.id)
-    setForm({ title: a.title, content: '' })
     setFile(null)
     setShowForm(true)
     setError('')
@@ -36,11 +28,7 @@ export default function AdminArticles() {
       fd.append('title', form.title)
       fd.append('content', form.content)
       if (file) fd.append('cover', file)
-      if (editId) {
-        await api.put(`/articles/${editId}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-      } else {
-        await api.post('/articles', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-      }
+      await api.post('/articles', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       setShowForm(false)
       resource.retry()
     } catch (err) {
@@ -71,6 +59,7 @@ export default function AdminArticles() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-neutral-200">
+              <th className="text-left p-2">Cover</th>
               <th className="text-left p-2">Judul</th>
               <th className="text-left p-2">Penulis</th>
               <th className="text-left p-2">Tanggal</th>
@@ -80,11 +69,16 @@ export default function AdminArticles() {
           <tbody>
             {articles.map((a) => (
               <tr key={a.id} className="border-b border-neutral-100">
+                <td className="p-2">
+                  {a.cover_path
+                    ? <img src={a.cover_path} alt={`Cover ${a.title}`} className="w-16 h-12 object-cover border border-neutral-200 bg-white" />
+                    : <span className="text-xs text-neutral-500">Tanpa cover</span>}
+                </td>
                 <td className="p-2">{a.title}</td>
                 <td className="p-2">{a.author_name}</td>
                 <td className="p-2">{new Date(a.created_at).toLocaleDateString('id-ID')}</td>
                 <td className="p-2 flex gap-2">
-                  <button onClick={() => openEdit(a)} className="text-[#15803D]">Edit</button>
+                  <button onClick={() => navigate(`/admin/artikel/${a.id}/edit`)} className="text-[#15803D]">Edit</button>
                   <button onClick={() => remove(a.id)} className="text-neutral-700">Hapus</button>
                 </td>
               </tr>
@@ -95,7 +89,7 @@ export default function AdminArticles() {
 
       {showForm && (
         <div className="border border-neutral-200 p-3 max-w-md">
-          <div className="text-sm font-medium mb-2">{editId ? 'Edit Artikel' : 'Tambah Artikel'}</div>
+          <div className="text-sm font-medium mb-2">Tambah Artikel</div>
           {error && <div className="text-sm text-neutral-700 mb-2" role="alert">{error}</div>}
           <form onSubmit={submit} className="space-y-2">
             <div>
@@ -104,7 +98,7 @@ export default function AdminArticles() {
             </div>
             <div>
               <label htmlFor="article-content" className="block text-sm mb-1">Isi</label>
-              <textarea id="article-content" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full border border-neutral-300 px-2 py-1.5" rows={4} required />
+              <textarea id="article-content" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} className="w-full border border-neutral-300 px-2 py-1.5" rows={8} required />
             </div>
             <div>
               <label htmlFor="article-cover" className="block text-sm mb-1">Cover (jpg/png/webp)</label>

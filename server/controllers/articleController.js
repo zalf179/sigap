@@ -48,6 +48,22 @@ export async function adminListArticles(req, res, next) {
   }
 }
 
+export async function adminGetArticle(req, res, next) {
+  try {
+    const { id } = req.params
+    const articles = await query(
+      'SELECT a.id, a.title, a.slug, a.content, a.cover_path, a.created_at, a.updated_at, u.name as author_name FROM articles a JOIN users u ON u.id = a.author_id WHERE a.id = ?',
+      [id]
+    )
+    if (articles.length === 0) {
+      return res.status(404).json({ error: 'Artikel tidak ditemukan' })
+    }
+    res.json({ article: articles[0] })
+  } catch (e) {
+    next(e)
+  }
+}
+
 export async function createArticle(req, res, next) {
   try {
     const { title, content } = req.body
@@ -70,6 +86,9 @@ export async function updateArticle(req, res, next) {
   try {
     const { id } = req.params
     const { title, content } = req.body
+    if (!title || !content) {
+      return res.status(400).json({ error: 'Judul dan isi wajib diisi' })
+    }
     const articles = await query('SELECT id FROM articles WHERE id = ?', [id])
     if (articles.length === 0) {
       return res.status(404).json({ error: 'Artikel tidak ditemukan' })
