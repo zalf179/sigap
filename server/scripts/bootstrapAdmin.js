@@ -1,8 +1,12 @@
 import { randomBytes } from 'crypto'
 import bcrypt from 'bcrypt'
+import { chmod, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { pool, query } from '../db/conn.js'
 
 const email = (process.argv[2] || 'admin@sigap.local').trim()
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 async function bootstrapAdmin() {
   if (email.length > 150 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -23,6 +27,11 @@ async function bootstrapAdmin() {
 
   const password = randomBytes(24).toString('base64url')
   const passwordHash = await bcrypt.hash(password, 12)
+  const passwordFile = process.env.ADMIN_BOOTSTRAP_PASSWORD_FILE
+    ? path.resolve(process.env.ADMIN_BOOTSTRAP_PASSWORD_FILE)
+    : path.resolve(__dirname, '../.admin-bootstrap-password')
+  await writeFile(passwordFile, `${password}\n`, { mode: 0o600 })
+  await chmod(passwordFile, 0o600)
 
   if (matchingUsers.length > 0) {
     await query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, matchingUsers[0].id])
@@ -33,8 +42,8 @@ async function bootstrapAdmin() {
     )
   }
 
-  console.log(`Admin email: ${email}`)
-  console.log(`Generated password (shown once): ${password}`)
+  console.log('Admin bootstrap completed. Read the generated password from the protected password file.')
+  console.log(`Password file: ${passwordFile}`)
 
   const articles = await query('SELECT COUNT(*) AS total FROM articles')
   if (articles[0].total === 0) {

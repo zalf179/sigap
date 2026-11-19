@@ -1,4 +1,5 @@
 import fs from 'fs/promises'
+import { resolveUploadPath } from '../utils/uploadPath.js'
 
 function detectImageType(buffer) {
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg'
@@ -11,8 +12,10 @@ export async function validateImageSignature(req, res, next) {
   if (!req.file) return next()
 
   let handle
+  let uploadPath
   try {
-    handle = await fs.open(req.file.path, 'r')
+    uploadPath = resolveUploadPath(req.file.filename)
+    handle = await fs.open(uploadPath, 'r')
     const header = Buffer.alloc(12)
     const { bytesRead } = await handle.read(header, 0, header.length, 0)
     await handle.close()
@@ -20,13 +23,13 @@ export async function validateImageSignature(req, res, next) {
 
     const detectedType = detectImageType(header.subarray(0, bytesRead))
     if (!detectedType || detectedType !== req.file.mimetype) {
-      await fs.unlink(req.file.path)
+      await fs.unlink(uploadPath)
       return res.status(400).json({ error: 'File harus berupa gambar JPEG, PNG, atau WebP yang valid.' })
     }
     return next()
   } catch (error) {
     await handle?.close().catch(() => {})
-    await fs.unlink(req.file.path).catch(() => {})
+    if (uploadPath) await fs.unlink(uploadPath).catch(() => {})
     return next(error)
   }
 }

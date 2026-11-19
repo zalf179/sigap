@@ -6,3 +6,4 @@ __pycache__/
 *.py[cod]
 uploads/*
 !uploads/.gitkeep
+.admin-bootstrap-password

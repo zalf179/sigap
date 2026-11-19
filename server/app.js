@@ -17,6 +17,7 @@ import userRoutes from './routes/users.js'
 import statsRoutes from './routes/stats.js'
 import exportRoutes from './routes/export.js'
 import { pool } from './db/conn.js'
+import { apiLimiter } from './middleware/rateLimiters.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -26,7 +27,10 @@ dotenv.config({ path: path.resolve(__dirname, './.env') })
 const app = express()
 const PORT = process.env.PORT || 5000
 
+// Production traffic reaches this service through the single frontend Nginx proxy.
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : false)
 app.use(cors())
+app.use('/api', apiLimiter)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 

@@ -1,14 +1,13 @@
 import bcrypt from 'bcrypt'
-import { randomBytes } from 'node:crypto'
+import { randomInt } from 'node:crypto'
 import { query } from '../db/conn.js'
 
 const TEMP_PASSWORD_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
 
 function generateTempPassword(length = 10) {
-  const bytes = randomBytes(length)
   let password = ''
   for (let i = 0; i < length; i += 1) {
-    password += TEMP_PASSWORD_ALPHABET[bytes[i] % TEMP_PASSWORD_ALPHABET.length]
+    password += TEMP_PASSWORD_ALPHABET[randomInt(TEMP_PASSWORD_ALPHABET.length)]
   }
   return password
 }

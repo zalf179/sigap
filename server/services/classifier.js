@@ -1,8 +1,10 @@
 import { readFile } from 'fs/promises'
-import { basename } from 'path'
+import { basename } from 'node:path'
 import { query } from '../db/conn.js'
+import { resolveUploadPath } from '../utils/uploadPath.js'
 
-export async function classifyWasteImage(filePath, contentType = 'image/jpeg') {
+export async function classifyWasteImage(fileName, contentType = 'image/jpeg') {
+  const filePath = resolveUploadPath(fileName)
   const aiServiceUrl = process.env.AI_WASTE_URL || 'http://127.0.0.1:8000/api/v1/identify'
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), Number(process.env.AI_WASTE_TIMEOUT_MS) || 300_000)

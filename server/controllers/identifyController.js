@@ -1,12 +1,13 @@
 import { unlink } from 'fs/promises'
 import { classifyWasteImage } from '../services/classifier.js'
+import { resolveUploadPath } from '../utils/uploadPath.js'
 
 export async function identifyWaste(req, res, next) {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'Foto wajib diunggah' })
     }
-    const result = await classifyWasteImage(req.file.path, req.file.mimetype)
+    const result = await classifyWasteImage(req.file.filename, req.file.mimetype)
     res.json({
       category: {
         id: result.category.id,
@@ -23,7 +24,11 @@ export async function identifyWaste(req, res, next) {
       top3: result.top3
     })
   } catch (e) {
-    await unlink(req.file.path).catch(() => {})
+    try {
+      await unlink(resolveUploadPath(req.file.filename))
+    } catch {
+      // The upload may already be removed, or its name may fail containment validation.
+    }
     next(e)
   }
 }
