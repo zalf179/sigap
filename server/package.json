@@ -22,6 +22,9 @@
     "pdfkit": "^0.20.2",
     "uuid": "^10.0.0"
   },
+  "overrides": {
+    "tar": "^7.5.19"
+  },
   "devDependencies": {
     "nodemon": "^3.1.7"
   }
