@@ -26,7 +26,7 @@ services:
       PMA_PORT: 3306
       PMA_ARBITRARY: 0
     ports:
-      - "127.0.0.1:${PHPMYADMIN_PORT:-8081}:80"
+      - "0.0.0.0:${PHPMYADMIN_PORT:-8081}:80"
     depends_on:
       mysql:
         condition: service_healthy
