@@ -193,18 +193,19 @@ export async function exportReports(req, res) {
       return res.status(400).json({ error: 'Format tidak valid. Gunakan xlsx atau pdf.' })
     }
 
-    let sql = `SELECT DATE_FORMAT(r.created_at, '%Y-%m-%d') AS report_date,
-                      r.status, r.landmark AS description,
-                      b.name AS block, c.name AS category
-               FROM reports r
-               JOIN blocks b ON b.id = r.block_id
-               JOIN waste_categories c ON c.id = r.category_id
+    let sql = `SELECT DATE_FORMAT(p.tanggal_dibuat, '%Y-%m-%d') AS report_date,
+                      p.status, p.patokan_lokasi AS description,
+                      b.nama_blok AS block, k.nama_kategori AS category
+               FROM pengaduan p
+               JOIN warga w ON w.id_warga = p.id_warga
+               LEFT JOIN blok b ON b.id_blok = w.id_blok
+               JOIN kategori_sampah k ON k.id_kategori = p.id_kategori
                WHERE 1=1`
     const params = []
-    if (from) { sql += ' AND DATE(r.created_at) >= ?'; params.push(from) }
-    if (to) { sql += ' AND DATE(r.created_at) <= ?'; params.push(to) }
-    if (blockId) { sql += ' AND r.block_id = ?'; params.push(blockId) }
-    sql += ' ORDER BY r.created_at ASC'
+    if (from) { sql += ' AND DATE(p.tanggal_dibuat) >= ?'; params.push(from) }
+    if (to) { sql += ' AND DATE(p.tanggal_dibuat) <= ?'; params.push(to) }
+    if (blockId) { sql += ' AND w.id_blok = ?'; params.push(blockId) }
+    sql += ' ORDER BY p.tanggal_dibuat ASC'
     const rows = await query(sql, params)
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Tidak ada laporan pada rentang ini.' })

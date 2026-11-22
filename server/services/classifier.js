@@ -38,7 +38,7 @@ export async function classifyWasteImage(fileName, contentType = 'image/jpeg') {
     if (!provider) throw new Error('Layanan AI tidak mengirim nama model/provider.')
 
     const categories = await query(
-      'SELECT id, name, description, handling_instruction FROM waste_categories'
+      'SELECT id_kategori AS id, nama_kategori AS name, deskripsi AS description, panduan_penanganan AS handling_instruction FROM kategori_sampah'
     )
     const categoryByName = new Map(categories.map((category) => [category.name.toLowerCase(), category]))
 

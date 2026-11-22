@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import AppShell from '../components/AppShell'
 import api from '../api/axios'
+import { useAuth } from '../context/AuthContext'
 
 export default function BuatLaporan() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const state = location.state || {}
-  const [blocks, setBlocks] = useState([])
   const [categories, setCategories] = useState([])
-  const [form, setForm] = useState({ block_id: '', landmark: '', category_id: state.categoryId || '' })
+  const [form, setForm] = useState({ landmark: '', category_id: state.categoryId || '' })
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [ticket, setTicket] = useState('')
@@ -17,7 +18,6 @@ export default function BuatLaporan() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    api.get('/blocks').then((res) => setBlocks(res.data.blocks || [])).catch(() => {})
     api.get('/categories').then((res) => setCategories(res.data.categories || [])).catch(() => {})
   }, [])
 
@@ -40,7 +40,6 @@ export default function BuatLaporan() {
     setLoading(true)
     try {
       const fd = new FormData()
-      fd.append('block_id', form.block_id)
       fd.append('landmark', form.landmark)
       fd.append('category_id', form.category_id)
       fd.append('photo', file)
@@ -71,15 +70,7 @@ export default function BuatLaporan() {
       <h1 className="text-lg font-semibold mb-4">Buat Laporan</h1>
       {error && <div className="text-sm text-neutral-700 mb-2" role="alert">{error}</div>}
       <form onSubmit={submit} className="space-y-3 max-w-md">
-        <div>
-          <label htmlFor="report-block" className="block text-sm mb-1">Lokasi (Blok)</label>
-          <select id="report-block" value={form.block_id} onChange={(e) => setForm({ ...form, block_id: e.target.value })} className="w-full border border-neutral-300 px-2 py-1.5 bg-white text-neutral-900" required>
-            <option value="" className="bg-white text-neutral-900">Pilih Blok</option>
-            {blocks.map((b) => (
-              <option key={b.id} value={b.id} className="bg-white text-neutral-900">{b.name}</option>
-            ))}
-          </select>
-        </div>
+        <div className="text-sm">Lokasi blok: <span className="font-medium">{user?.block_name || 'Blok belum diatur'}</span></div>
         <div>
           <label htmlFor="report-landmark" className="block text-sm mb-1">Patokan Detail</label>
           <textarea id="report-landmark" value={form.landmark} onChange={(e) => setForm({ ...form, landmark: e.target.value })} className="w-full border border-neutral-300 px-2 py-1.5" rows={3} required />

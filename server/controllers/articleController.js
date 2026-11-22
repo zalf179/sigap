@@ -13,7 +13,7 @@ function slugify(text) {
 export async function publicListArticles(req, res, next) {
   try {
     const articles = await query(
-      'SELECT id, title, slug, cover_path, created_at FROM articles ORDER BY created_at DESC LIMIT 10'
+      'SELECT id_artikel AS id, judul AS title, slug, gambar_sampul AS cover_path, tanggal_dibuat AS created_at FROM artikel ORDER BY tanggal_dibuat DESC LIMIT 10'
     )
     res.json({ articles })
   } catch (e) {
@@ -25,7 +25,7 @@ export async function publicGetArticle(req, res, next) {
   try {
     const { slug } = req.params
     const articles = await query(
-      'SELECT a.id, a.title, a.slug, a.content, a.cover_path, a.created_at, a.updated_at, u.name as author_name FROM articles a JOIN users u ON u.id = a.author_id WHERE a.slug = ?',
+      'SELECT a.id_artikel AS id, a.judul AS title, a.slug, a.isi AS content, a.gambar_sampul AS cover_path, a.tanggal_dibuat AS created_at, a.tanggal_diperbarui AS updated_at, u.nama as author_name FROM artikel a JOIN admin u ON u.id_admin = a.id_admin WHERE a.slug = ?',
       [slug]
     )
     if (articles.length === 0) {
@@ -40,7 +40,7 @@ export async function publicGetArticle(req, res, next) {
 export async function adminListArticles(req, res, next) {
   try {
     const articles = await query(
-      'SELECT a.id, a.title, a.slug, a.cover_path, a.created_at, a.updated_at, u.name as author_name FROM articles a JOIN users u ON u.id = a.author_id ORDER BY a.created_at DESC'
+      'SELECT a.id_artikel AS id, a.judul AS title, a.slug, a.gambar_sampul AS cover_path, a.tanggal_dibuat AS created_at, a.tanggal_diperbarui AS updated_at, u.nama as author_name FROM artikel a JOIN admin u ON u.id_admin = a.id_admin ORDER BY a.tanggal_dibuat DESC'
     )
     res.json({ articles })
   } catch (e) {
@@ -52,7 +52,7 @@ export async function adminGetArticle(req, res, next) {
   try {
     const { id } = req.params
     const articles = await query(
-      'SELECT a.id, a.title, a.slug, a.content, a.cover_path, a.created_at, a.updated_at, u.name as author_name FROM articles a JOIN users u ON u.id = a.author_id WHERE a.id = ?',
+      'SELECT a.id_artikel AS id, a.judul AS title, a.slug, a.isi AS content, a.gambar_sampul AS cover_path, a.tanggal_dibuat AS created_at, a.tanggal_diperbarui AS updated_at, u.nama as author_name FROM artikel a JOIN admin u ON u.id_admin = a.id_admin WHERE a.id_artikel = ?',
       [id]
     )
     if (articles.length === 0) {
@@ -73,7 +73,7 @@ export async function createArticle(req, res, next) {
     const slug = slugify(title) + '-' + Date.now().toString().slice(-6)
     const cover_path = req.file ? `/uploads/${req.file.filename}` : null
     await query(
-      'INSERT INTO articles (title, slug, content, cover_path, author_id) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO artikel (judul, slug, isi, gambar_sampul, id_admin) VALUES (?, ?, ?, ?, ?)',
       [title, slug, content, cover_path, req.user.id]
     )
     res.status(201).json({ message: 'Artikel dibuat' })
@@ -89,17 +89,17 @@ export async function updateArticle(req, res, next) {
     if (!title || !content) {
       return res.status(400).json({ error: 'Judul dan isi wajib diisi' })
     }
-    const articles = await query('SELECT id FROM articles WHERE id = ?', [id])
+    const articles = await query('SELECT id_artikel AS id FROM artikel WHERE id_artikel = ?', [id])
     if (articles.length === 0) {
       return res.status(404).json({ error: 'Artikel tidak ditemukan' })
     }
-    let sql = 'UPDATE articles SET title = ?, content = ?'
+    let sql = 'UPDATE artikel SET judul = ?, isi = ?'
     const params = [title, content]
     if (req.file) {
-      sql += ', cover_path = ?'
+      sql += ', gambar_sampul = ?'
       params.push(`/uploads/${req.file.filename}`)
     }
-    sql += ' WHERE id = ?'
+    sql += ' WHERE id_artikel = ?'
     params.push(id)
     await query(sql, params)
     res.json({ message: 'Artikel diperbarui' })
@@ -111,7 +111,7 @@ export async function updateArticle(req, res, next) {
 export async function deleteArticle(req, res, next) {
   try {
     const { id } = req.params
-    await query('DELETE FROM articles WHERE id = ?', [id])
+    await query('DELETE FROM artikel WHERE id_artikel = ?', [id])
     res.json({ message: 'Artikel dihapus' })
   } catch (e) {
     next(e)
