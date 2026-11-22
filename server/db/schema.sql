@@ -1,79 +1,92 @@
 CREATE DATABASE IF NOT EXISTS sigap CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE sigap;
 
-CREATE TABLE IF NOT EXISTS blocks (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL
+CREATE TABLE IF NOT EXISTS blok (
+  id_blok INT AUTO_INCREMENT PRIMARY KEY,
+  nama_blok VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(150) NOT NULL,
+CREATE TABLE IF NOT EXISTS admin (
+  id_admin INT AUTO_INCREMENT PRIMARY KEY,
+  nama VARCHAR(150) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
-  phone VARCHAR(30),
-  password_hash VARCHAR(255) NOT NULL,
-  role ENUM('warga','petugas','admin') NOT NULL DEFAULT 'warga',
-  block_id INT,
-  house_number VARCHAR(50),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_users_block FOREIGN KEY (block_id) REFERENCES blocks(id) ON DELETE SET NULL,
-  INDEX idx_users_role (role),
-  INDEX idx_users_block (block_id)
+  no_telepon VARCHAR(30),
+  kata_sandi VARCHAR(255) NOT NULL,
+  tanggal_dibuat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS waste_categories (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  handling_instruction TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS warga (
+  id_warga INT AUTO_INCREMENT PRIMARY KEY,
+  nama VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  no_telepon VARCHAR(30),
+  kata_sandi VARCHAR(255) NOT NULL,
+  nomor_rumah VARCHAR(50),
+  tanggal_dibuat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id_blok INT,
+  CONSTRAINT fk_warga_blok FOREIGN KEY (id_blok) REFERENCES blok(id_blok) ON DELETE SET NULL,
+  INDEX idx_warga_blok (id_blok)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS reports (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  ticket_number VARCHAR(50) NOT NULL UNIQUE,
-  user_id INT NOT NULL,
-  block_id INT NOT NULL,
-  landmark TEXT,
-  category_id INT NOT NULL,
-  photo_path VARCHAR(255),
+CREATE TABLE IF NOT EXISTS petugas (
+  id_petugas INT AUTO_INCREMENT PRIMARY KEY,
+  nama VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  no_telepon VARCHAR(30),
+  kata_sandi VARCHAR(255) NOT NULL,
+  tanggal_dibuat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS kategori_sampah (
+  id_kategori INT AUTO_INCREMENT PRIMARY KEY,
+  nama_kategori VARCHAR(100) NOT NULL,
+  deskripsi TEXT,
+  panduan_penanganan TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS pengaduan (
+  id_pengaduan INT AUTO_INCREMENT PRIMARY KEY,
+  nomor_tiket VARCHAR(50) NOT NULL UNIQUE,
+  patokan_lokasi TEXT,
+  foto VARCHAR(255),
   status ENUM('Menunggu','Sedang Diproses','Selesai') NOT NULL DEFAULT 'Menunggu',
-  handled_by INT NULL,
-  processed_at DATETIME NULL,
-  completed_at DATETIME NULL,
-  proof_photo_path VARCHAR(255) NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_reports_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
-  CONSTRAINT fk_reports_block FOREIGN KEY (block_id) REFERENCES blocks(id) ON DELETE RESTRICT,
-  CONSTRAINT fk_reports_category FOREIGN KEY (category_id) REFERENCES waste_categories(id) ON DELETE RESTRICT,
-  CONSTRAINT fk_reports_handled_by FOREIGN KEY (handled_by) REFERENCES users(id) ON DELETE SET NULL,
-  INDEX idx_reports_status (status),
-  INDEX idx_reports_user (user_id),
-  INDEX idx_reports_block (block_id),
-  INDEX idx_reports_created_at (created_at)
+  waktu_diproses DATETIME NULL,
+  waktu_selesai DATETIME NULL,
+  foto_bukti VARCHAR(255) NULL,
+  tanggal_dibuat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id_warga INT NOT NULL,
+  id_kategori INT NOT NULL,
+  id_petugas INT NULL,
+  CONSTRAINT fk_pengaduan_warga FOREIGN KEY (id_warga) REFERENCES warga(id_warga) ON DELETE RESTRICT,
+  CONSTRAINT fk_pengaduan_kategori FOREIGN KEY (id_kategori) REFERENCES kategori_sampah(id_kategori) ON DELETE RESTRICT,
+  CONSTRAINT fk_pengaduan_petugas FOREIGN KEY (id_petugas) REFERENCES petugas(id_petugas) ON DELETE SET NULL,
+  INDEX idx_pengaduan_status (status),
+  INDEX idx_pengaduan_warga (id_warga),
+  INDEX idx_pengaduan_tanggal_dibuat (tanggal_dibuat)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS articles (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(200) NOT NULL,
+CREATE TABLE IF NOT EXISTS artikel (
+  id_artikel INT AUTO_INCREMENT PRIMARY KEY,
+  judul VARCHAR(200) NOT NULL,
   slug VARCHAR(200) NOT NULL UNIQUE,
-  content LONGTEXT NOT NULL,
-  cover_path VARCHAR(255) NULL,
-  author_id INT NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_articles_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE RESTRICT,
-  INDEX idx_articles_slug (slug)
+  isi LONGTEXT NOT NULL,
+  gambar_sampul VARCHAR(255) NULL,
+  tanggal_dibuat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  tanggal_diperbarui TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  id_admin INT NOT NULL,
+  CONSTRAINT fk_artikel_admin FOREIGN KEY (id_admin) REFERENCES admin(id_admin) ON DELETE RESTRICT,
+  INDEX idx_artikel_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS pickup_schedules (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  block_id INT NOT NULL,
-  day_of_week ENUM('Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu') NOT NULL,
-  time_start TIME NOT NULL,
-  time_end TIME NOT NULL,
-  waste_type VARCHAR(100) NOT NULL,
-  notes TEXT,
-  CONSTRAINT fk_pickup_block FOREIGN KEY (block_id) REFERENCES blocks(id) ON DELETE RESTRICT,
-  INDEX idx_pickup_block (block_id),
-  INDEX idx_pickup_day (day_of_week)
+CREATE TABLE IF NOT EXISTS jadwal_pengangkutan (
+  id_jadwal INT AUTO_INCREMENT PRIMARY KEY,
+  hari ENUM('Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu') NOT NULL,
+  jam_mulai TIME NOT NULL,
+  jam_selesai TIME NOT NULL,
+  jenis_sampah VARCHAR(100) NOT NULL,
+  catatan TEXT,
+  id_blok INT NOT NULL,
+  CONSTRAINT fk_jadwal_blok FOREIGN KEY (id_blok) REFERENCES blok(id_blok) ON DELETE RESTRICT,
+  INDEX idx_jadwal_blok (id_blok),
+  INDEX idx_jadwal_hari (hari)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
