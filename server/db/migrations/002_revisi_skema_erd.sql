@@ -5,6 +5,28 @@
 
 USE sigap;
 
+-- Pemindahan data yang disetujui: tiket SGP-20261027-8148 (id=1) semula
+-- dimiliki akun petugas budi (users.id=3). Pemiliknya dipindahkan ke rizal
+-- (users.id=11, warga, Blok B). Kolom handled_by sengaja tidak diubah.
+DELIMITER //
+DROP PROCEDURE IF EXISTS pindahkan_pemilik_pengaduan_erd//
+CREATE PROCEDURE pindahkan_pemilik_pengaduan_erd()
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM users WHERE id=11 AND role='warga' AND email='rizal@sigap.local') THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Warga tujuan rizal (id=11) tidak ditemukan; pemindahan pengaduan dibatalkan.';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM reports WHERE id=1 AND ticket_number='SGP-20261027-8148' AND user_id=3) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Pengaduan sumber tidak cocok; pemindahan pemilik dibatalkan.';
+  END IF;
+  IF EXISTS (SELECT 1 FROM reports r JOIN users u ON u.id=r.user_id WHERE u.role<>'warga' AND r.id<>1) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Masih ada pengaduan lain yang pemiliknya bukan warga; tidak ada data yang dipindahkan.';
+  END IF;
+  UPDATE reports SET user_id = 11 WHERE id = 1 AND user_id = 3;
+END//
+CALL pindahkan_pemilik_pengaduan_erd()//
+DROP PROCEDURE pindahkan_pemilik_pengaduan_erd//
+DELIMITER ;
+
 -- Lokasi pengaduan setelah migrasi mengikuti warga.id_blok. Nilai reports.block_id
 -- yang berbeda dari blok profil tidak disimpan karena kolom tersebut tidak ada di ERD target.
 SELECT COUNT(*) AS jumlah_pengaduan_dengan_blok_berbeda_dari_profil
@@ -17,7 +39,7 @@ DROP PROCEDURE IF EXISTS pra_verifikasi_migrasi_erd//
 CREATE PROCEDURE pra_verifikasi_migrasi_erd()
 BEGIN
   IF EXISTS (SELECT 1 FROM reports r JOIN users u ON u.id=r.user_id WHERE u.role<>'warga') THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Ada pengaduan milik akun yang role lamanya bukan warga; selesaikan pemetaan akun sebelum migrasi.';
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Masih ada pengaduan yang pemiliknya bukan warga. Perbarui reports.user_id secara eksplisit sebelum migrasi.';
   END IF;
   IF EXISTS (SELECT 1 FROM articles a JOIN users u ON u.id=a.author_id WHERE u.role<>'admin') THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Ada artikel yang penulisnya bukan admin; selesaikan pemetaan penulis sebelum migrasi.';
