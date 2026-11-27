@@ -55,7 +55,7 @@ export default function BuatLaporan() {
   if (ticket) {
     return (
       <AppShell>
-        <h1 className="text-lg font-semibold mb-2">Laporan Berhasil Dibuat</h1>
+        <h1 className="text-lg font-semibold mb-2">Pengajuan Berhasil Dibuat</h1>
         <p className="text-sm mb-3" role="status" aria-live="polite">Laporan berhasil dibuat. Nomor tiket: <span className="font-medium">{ticket}</span></p>
         <div className="flex gap-2">
           <button onClick={() => navigate('/laporan-saya')} className="bg-[#15803D] text-white px-3 py-1.5">Lihat Laporan Saya</button>
@@ -67,7 +67,7 @@ export default function BuatLaporan() {
 
   return (
     <AppShell>
-      <h1 className="text-lg font-semibold mb-4">Buat Laporan</h1>
+      <h1 className="text-lg font-semibold mb-4">Buat Pengajuan</h1>
       {error && <div className="text-sm text-neutral-700 mb-2" role="alert">{error}</div>}
       <form onSubmit={submit} className="space-y-3 max-w-md">
         <div className="text-sm">Lokasi blok: <span className="font-medium">{user?.block_name || 'Blok belum diatur'}</span></div>
@@ -94,7 +94,7 @@ export default function BuatLaporan() {
             <img src={preview} alt="Pratinjau" className="w-full max-h-64 object-contain bg-white" />
           </div>
         )}
-        <button disabled={loading} className="bg-[#15803D] text-white px-3 py-1.5">Kirim Laporan</button>
+        <button disabled={loading} className="bg-[#15803D] text-white px-3 py-1.5">Kirim Pengajuan</button>
       </form>
     </AppShell>
   )

@@ -43,8 +43,8 @@ export default function AppShell({ children }) {
     ? [
         { to: '/beranda', label: 'Beranda', icon: 'home' },
         { to: '/identifikasi', label: 'Identifikasi sampah', icon: 'identify' },
-        { to: '/lapor', label: 'Buat laporan', icon: 'report' },
-        { to: '/laporan-saya', label: 'Laporan saya', icon: 'list' },
+        { to: '/lapor', label: 'Buat pengajuan', icon: 'report' },
+        { to: '/laporan-saya', label: 'Ajuan saya', icon: 'list' },
       ]
     : user?.role === 'petugas'
       ? [

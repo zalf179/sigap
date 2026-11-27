@@ -29,7 +29,7 @@ export default function LaporanSaya() {
 
   return (
     <AppShell>
-      <h1 className="text-lg font-semibold mb-4">Laporan Saya</h1>
+      <h1 className="text-lg font-semibold mb-4">Ajuan Saya</h1>
       {loading && <div className="text-sm">Memuat...</div>}
       {!loading && reports.length === 0 && <div className="text-sm text-neutral-700">Belum ada laporan.</div>}
       {reports.length > 0 && (
